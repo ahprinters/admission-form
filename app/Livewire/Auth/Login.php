@@ -5,16 +5,15 @@ namespace App\Livewire\Auth;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Rule;
+use Illuminate\Validation\ValidationException;
 
 class Login extends Component
 {
-    #[Rule('required', message:'Enter your username')]
-    public $username;
-    #[Rule('required', message:'Enter your password')]
-    public $password;
+    #[Rule('required|email', message: 'একটি সঠিক ইমেইল ঠিকানা দিন')]
+    public $email;
 
-    #[Rule('required |same:password', message:'Password confirmation is required')]
-    public $password_confirmation;
+    #[Rule('required', message: 'পাসওয়ার্ড দিন')]
+    public $password;
 
     public $remember = false;
 
@@ -22,17 +21,22 @@ class Login extends Component
     {
         $this->validate();
 
-        // Authentication logic here
-        if(Auth::attempt(['username' => $this->username, 'password' => $this->password], $this->remember)) {
+        // ইমেইল এবং পাসওয়ার্ড দিয়ে লগইন করার চেষ্টা
+        if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             session()->regenerate();
-            // Redirect or perform actions on successful login
+
+            // লগইন সফল হলে ড্যাশবোর্ডে রিডাইরেক্ট
             return redirect()->intended('/dashboard');
         }
-        session()->flash('error', 'The provided credentials do not match our records.');
 
+        // লগইন ব্যর্থ হলে এরর মেসেজ
+        throw ValidationException::withMessages([
+            'email' => 'প্রদত্ত ইমেইল বা পাসওয়ার্ড আমাদের রেকর্ডের সাথে মিলছে না।',
+        ]);
     }
+
     public function render()
     {
-        return view('livewire.auth.login');
+        return view('livewire.auth.login')->layout('components.layouts.app');
     }
 }

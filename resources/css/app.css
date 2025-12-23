@@ -1,4 +1,6 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
-@import 'nprogress/nprogress.css'
+@import "tailwindcss"; /* Tailwind 4 এর জন্য */
+
+/* অথবা যদি Tailwind 3 ব্যবহার করেন তবে নিচের ৩টি লাইন */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

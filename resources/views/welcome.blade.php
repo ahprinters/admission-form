@@ -21,7 +21,7 @@
     </head>
     <body class="bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] flex p-6 lg:p-8 items-center lg:justify-center min-h-screen flex-col">
         <div class="w-full max-w-3xl">
-             <livewire:auth.login/>
+             {{-- <livewire:auth.login/> --}}
         </div>
     </body>
 </html>

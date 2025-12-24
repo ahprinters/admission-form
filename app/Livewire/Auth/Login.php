@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\Attributes\Rule;
 use Illuminate\Validation\ValidationException;
 
+
 class Login extends Component
 {
     #[Rule('required|email', message: 'একটি সঠিক ইমেইল ঠিকানা দিন')]
@@ -35,6 +36,14 @@ class Login extends Component
         ]);
     }
 
+    // logout logic can be added here in future
+    public function logout()
+    {
+        Auth::logout();
+        session()->invalidate();
+        session()->regenerateToken();
+        return redirect()->route('login');
+    }
     public function render()
     {
         return view('livewire.auth.login')->layout('components.layouts.app');

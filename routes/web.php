@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Dashboard;
 use App\Livewire\Auth\Login;
 use App\Livewire\StudentForm;
 use App\Livewire\StudentList;
@@ -11,13 +12,11 @@ Route::get('/', function () {
 });
 
 // লগইন রাউট (গেস্টদের জন্য)
-Route::get('/login', Login::class)->name('login')->middleware('guest');
+    Route::get('/login', Login::class)->name('login')->middleware('guest');
 
 // ড্যাশবোর্ড এবং স্টুডেন্ট রাউট (শুধুমাত্র লগইন করা ইউজারদের জন্য)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard'); // আপনার ড্যাশবোর্ড ভিউ
-    })->name('dashboard');
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
     Route::get('/students', StudentList::class)->name('student.index');
     Route::get('/student/create', StudentForm::class)->name('student.create');

@@ -1,30 +1,97 @@
-<aside class="w-64 bg-slate-800 text-white flex-shrink-0 hidden md:flex flex-col">
-    <div class="p-6 text-2xl font-bold border-b border-slate-700">
-        Admin Panel
-    </div>
+<div class="contents">
+    {{-- ফ্লাক্সের অ্যাপিয়ারেন্স ডিরেক্টিভ লেআউটে না থাকলে এখানেও রাখা যায় --}}
 
-    <nav class="flex-1 p-4 space-y-2">
-        <a href="/dashboard" wire:navigate class="flex items-center space-x-3 py-2.5 px-4 rounded transition {{ request()->is('dashboard') ? 'bg-slate-700 text-white' : 'text-zinc-400 hover:bg-slate-700 hover:text-white' }}">
-            <flux:icon.home variant="mini" />
-            <span class="text-sm font-medium">Dashboard</span>
-        </a>
+    <flux:sidebar sticky collapsible="mobile" class="bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-700">
+        <flux:sidebar.header>
+            <flux:sidebar.brand
+                href="/dashboard"
+                logo="https://fluxui.dev/img/demo/logo.png"
+                name="Admin Panel"
+            />
 
-        <flux:navlist.group expandable :expanded="request()->is('student*')" heading="শিক্ষার্থী ব্যবস্থাপনা">
-            <a href="/students" wire:navigate class="flex items-center space-x-3 py-2 px-4 rounded transition {{ request()->is('students') ? 'text-white' : 'text-zinc-400 hover:text-white' }}">
-                <flux:icon.users variant="mini" />
-                <span class="text-sm">শিক্ষার্থী তালিকা</span>
-            </a>
-            <a href="/student/create" wire:navigate class="flex items-center space-x-3 py-2 px-4 rounded transition {{ request()->is('student/create') ? 'text-white' : 'text-zinc-400 hover:text-white' }}">
-                <flux:icon.plus variant="mini" />
-                <span class="text-sm">নতুন শিক্ষার্থী</span>
-            </a>
-        </flux:navlist.group>
-    </nav>
+            <flux:sidebar.collapse class="lg:hidden" />
+        </flux:sidebar.header>
 
-    <div class="p-4 border-t border-slate-700">
-        <button wire:click="logout" class="flex items-center space-x-3 w-full text-left py-2 px-4 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded transition">
-            <flux:icon.arrow-right-on-rectangle variant="mini" />
-            <span class="text-sm font-medium">Logout</span>
-        </button>
-    </div>
-</aside>
+        {{-- সার্চ বার --}}
+        <flux:sidebar.search placeholder="Search menu..." />
+
+        <flux:sidebar.nav>
+            {{-- ড্যাশবোর্ড লিঙ্ক --}}
+            <flux:sidebar.item
+                icon="home"
+                href="/dashboard"
+                wire:navigate
+                :current="request()->is('dashboard')"
+            >
+                Dashboard
+            </flux:sidebar.item>
+
+            {{-- শিক্ষার্থী ব্যবস্থাপনা গ্রুপ (Expandable) --}}
+            <flux:sidebar.group expandable heading="শিক্ষার্থী ব্যবস্থাপনা" :expanded="request()->is('student*')">
+                <flux:sidebar.item
+                    icon="users"
+                    href="/students"
+                    wire:navigate
+                    :current="request()->is('students')"
+                >
+                    শিক্ষার্থী তালিকা
+                </flux:sidebar.item>
+
+                <flux:sidebar.item
+                    icon="plus-circle"
+                    href="/student/create"
+                    wire:navigate
+                    :current="request()->is('student/create')"
+                >
+                    নতুন শিক্ষার্থী
+                </flux:sidebar.item>
+            </flux:sidebar.group>
+
+            {{-- অন্যান্য মেনু --}}
+            <flux:sidebar.item icon="calendar" href="#">একাডেমিক ক্যালেন্ডার</flux:sidebar.item>
+        </flux:sidebar.nav>
+
+        <flux:sidebar.spacer />
+
+        {{-- সেটিংস ও হেল্প --}}
+        <flux:sidebar.nav>
+            <flux:sidebar.item icon="cog-6-tooth" href="#">সেটিংস</flux:sidebar.item>
+            <flux:sidebar.item icon="information-circle" href="#">হেল্প</flux:sidebar.item>
+        </flux:sidebar.nav>
+
+        {{-- প্রোফাইল এবং লগআউট ড্রপডাউন (ডেস্কটপ) --}}
+        <flux:dropdown position="top" align="start" class="max-lg:hidden">
+            <flux:sidebar.profile
+                avatar="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}"
+                name="{{ auth()->user()->name }}"
+            />
+
+            <flux:menu>
+                <flux:menu.item icon="user">প্রোফাইল</flux:menu.item>
+
+                <flux:menu.separator />
+
+                {{-- লগআউট বাটন --}}
+                <flux:menu.item
+                    wire:click="logout"
+                    icon="arrow-right-start-on-rectangle"
+                    variant="danger"
+                >
+                    Logout
+                </flux:menu.item>
+            </flux:menu>
+        </flux:dropdown>
+    </flux:sidebar>
+
+    {{-- মোবাইল ভিউ এর জন্য হেডার (যখন সাইডবার হাইড থাকে) --}}
+    <flux:header class="lg:hidden">
+        <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+        <flux:spacer />
+        <flux:dropdown position="top" align="end">
+            <flux:profile avatar="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}" />
+            <flux:menu>
+                <flux:menu.item wire:click="logout" icon="arrow-right-start-on-rectangle">Logout</flux:menu.item>
+            </flux:menu>
+        </flux:dropdown>
+    </flux:header>
+</div>

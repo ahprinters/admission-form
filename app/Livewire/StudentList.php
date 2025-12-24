@@ -19,7 +19,8 @@ class StudentList extends Component
     public function render()
     {
         return view('livewire.student-list', [
-            'students' => Student::latest()->paginate(10)
-        ]);
+            'students' => Student::latest()->paginate(5)
+        ])->layout('components.layouts.admin');
     }
 }
+

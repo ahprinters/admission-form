@@ -70,7 +70,7 @@ class StudentForm extends Component
             $student = Student::findOrFail($this->studentId)->update($validatedData );
 
             session()->flash('message', 'শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!');
-            return redirect()->route('student.index');
+            return $this->redirect('/students', navigate: true);
         } else{
             // নতুন ডাটা ইনসার্ট লজিক
             Student::create($validatedData);
@@ -84,6 +84,8 @@ class StudentForm extends Component
 
     public function render()
     {
-        return view('livewire.student-form');
+        return view('livewire.student-form')
+        ->layout('components.layouts.admin'); // আপনার এডমিন লেআউট ব্যবহার করুন  ;
     }
 }
+

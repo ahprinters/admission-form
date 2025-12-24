@@ -10,6 +10,8 @@ use Carbon\Carbon;
 
 class Dashboard extends Component
 {
+
+    public $search = '';
     public function render()
     {
         $today = Carbon::today();

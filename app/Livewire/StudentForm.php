@@ -4,53 +4,24 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Student;
+use Illuminate\Support\Facades\DB;
 
 class StudentForm extends Component
 {
-    public $studentId; //for edit functionality in future
+    public $studentId;
+
     // প্রোপার্টিজ
     public $name_en, $name_bn, $email, $class, $roll_number, $gender;
     public $phone, $date_of_birth, $nid_birth_certificate, $blood_group;
     public $nationality = 'Bangladeshi', $religion, $address, $is_active = true;
 
-    // // রিয়েল-টাইম ভ্যালিডেশনের জন্য (ঐচ্ছিক)
-    public function updated($propertyName)
-{
-    $this->validateOnly($propertyName, [
-        'name_en' => 'required',
-        'email'   => 'required|email|unique:students,email,' . ($this->studentId ?? 'NULL') . ',id',
-        'phone'   => 'required|numeric',
-    ]);
-}
-    public function mount($id = null)
+    // ভ্যালিডেশন রুলস (এক জায়গায় রাখা ভালো)
+    protected function rules()
     {
-        // যদি $studentId সেট করা থাকে, তাহলে এডিট মোডে কাজ করবে (ভবিষ্যতের জন্য)
-        if ($id) {
-            $student = Student::findOrFail($id);
-                $this->studentId = $student->id;
-                $this->name_en = $student->name_en;
-                $this->name_bn = $student->name_bn;
-                $this->email = $student->email;
-                $this->class = $student->class;
-                $this->roll_number = $student->roll_number;
-                $this->gender = $student->gender;
-                $this->phone = $student->phone;
-                $this->date_of_birth = $student->date_of_birth;
-                $this->nid_birth_certificate = $student->nid_birth_certificate;
-                $this->blood_group = $student->blood_group;
-                $this->nationality = $student->nationality;
-                $this->religion = $student->religion;
-                $this->address = $student->address;
-                $this->is_active = $student->is_active;
-           }
-        }
-
-    public function submit()
-    {
-        $rules = [
-            'name_en'               => 'required',
-            'name_bn'               => 'required',
-            'email'                 => 'required|email|unique:students,email,' . ($this->studentId ?? 'NULL') . ',id',
+        return [
+            'name_en'               => 'required|min:3',
+            'name_bn'               => 'required|min:3',
+            'email'                 => 'required|email|unique:students,email,' . ($this->studentId ?? 'NULL'),
             'class'                 => 'required',
             'roll_number'           => 'required',
             'gender'                => 'required|in:male,female',
@@ -63,29 +34,69 @@ class StudentForm extends Component
             'address'               => 'nullable|string',
             'is_active'             => 'boolean',
         ];
-        $validatedData = $this->validate($rules);
+    }
 
-        if($this->studentId){
-            // আপডেট লজিক (ভবিষ্যতের জন্য)
-            $student = Student::findOrFail($this->studentId)->update($validatedData );
+    // রিয়েল-টাইম ভ্যালিডেশন
+    public function updated($propertyName)
+    {
+        $this->validateOnly($propertyName);
+    }
 
-            session()->flash('message', 'শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!');
-            return $this->redirect('/students', navigate: true);
-        } else{
-            // নতুন ডাটা ইনসার্ট লজিক
-            Student::create($validatedData);
-            session()->flash('message', 'নতুন শিক্ষার্থীর তথ্য সফলভাবে সংরক্ষণ করা হয়েছে!');
+    public function mount($id = null)
+    {
+        if ($id) {
+            $student = Student::findOrFail($id);
+            $this->studentId = $student->id;
+            $this->fill($student->toArray()); // fill() ব্যবহার করলে কোড অনেক ছোট হয়
         }
-         // ফর্ম রিসেট
-        $this->reset();
-        // Redirect to student list
-        return redirect()->route('student.index');
+    }
+
+    public function submit()
+    {
+        $validatedData = $this->validate();
+
+        try {
+            DB::beginTransaction();
+
+            if ($this->studentId) {
+                // আপডেট লজিক
+                Student::find($this->studentId)->update($validatedData);
+
+                $this->dispatch('swal',
+                    icon: 'success',
+                    message: 'শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!'
+                );
+
+                DB::commit();
+                return $this->redirect('/students', navigate: true);
+            } else {
+                // নতুন ডাটা ইনসার্ট লজিক
+                Student::create($validatedData);
+
+                $this->dispatch('swal',
+                    icon: 'success',
+                    message: 'নতুন শিক্ষার্থীর তথ্য সফলভাবে সংরক্ষণ করা হয়েছে!'
+                );
+
+                DB::commit();
+                $this->reset(); // ফর্ম রিসেট
+                return redirect()->route('student.index');
+            }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // কোনো ভুল হলে এরর পপ-আপ দেখাবে
+            $this->dispatch('swal',
+                icon: 'error',
+                message: 'দুঃখিত! তথ্য সংরক্ষণ করা সম্ভব হয়নি।'
+            );
+        }
     }
 
     public function render()
     {
         return view('livewire.student-form')
-        ->layout('components.layouts.admin'); // আপনার এডমিন লেআউট ব্যবহার করুন  ;
+            ->layout('components.layouts.admin');
     }
 }
-

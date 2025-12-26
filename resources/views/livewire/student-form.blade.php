@@ -21,6 +21,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <x-form-input name="name_en" label="Name (English)" placeholder="Enter name in English" icon="user-circle" />
                     <x-form-input name="name_bn" label="Name (Bangla)" placeholder="শিক্ষার্থীর নাম বাংলায় লিখুন" icon="user-circle" />
+                    <x-form-input name="email" type="email" label="Email Address" placeholder="student@example.com" icon="envelope" />
 
                     <x-form-input name="father_name" label="Father's Name" placeholder="Enter father's name" icon="user" />
                     <x-form-input name="mother_name" label="Mother's Name" placeholder="Enter mother's name" icon="user" />

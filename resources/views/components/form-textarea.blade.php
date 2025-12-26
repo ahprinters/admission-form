@@ -1,7 +1,7 @@
 @props([
     'name',
     'label' => null,
-    'type' => 'text',
+    'rows' => 4,
     'placeholder' => '',
     'model' => null,
     'wire' => 'defer',
@@ -16,6 +16,7 @@
 
     $classes = trim(
         $field['baseControlClass'].' '
+        .FormField::extra('textarea').' '
         .FormField::stateClass($hasError)
     );
 @endphp
@@ -27,15 +28,15 @@
         </label>
     @endif
 
-    <input
-        type="{{ $type }}"
+    <textarea
         id="{{ $field['id'] }}"
+        rows="{{ $rows }}"
         placeholder="{{ $placeholder }}"
         @if(!$field['wireModelAttr'])
             {{ $field['defaultWireDirective'] }}="{{ $field['modelName'] }}"
         @endif
         {{ $attributes->merge(['class' => $classes]) }}
-    >
+    ></textarea>
 
     @if($hint)
         <div class="{{ $field['hintClass'] }}">{{ $hint }}</div>

@@ -52,58 +52,71 @@ class StudentForm extends Component
         }
     }
 
-    public function submit()
-    {
-        $validatedData = $this->validate();
+   public function submit()
+{
+    $validatedData = $this->validate();
 
-        try {
-            DB::beginTransaction();
+    try {
+        DB::beginTransaction();
 
-            if ($this->studentId) {
-                // আপডেট লজিক
-                Student::find($this->studentId)->update($validatedData);
+        if ($this->studentId) {
+            Student::findOrFail($this->studentId)->update($validatedData);
 
-                $this->dispatch('swal',
-                    icon: 'success',
-                    message: 'শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!'
-                );
+            DB::commit();
 
-                DB::commit();
-                return $this->redirect('/students', navigate: true);
-            } else {
-                // নতুন ডাটা ইনসার্ট লজিক
-                Student::create($validatedData);
+            // ✅ Flash message
+            session()->flash('success', 'শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!');
 
-                $this->dispatch('swal',
-                    icon: 'success',
-                    message: 'নতুন শিক্ষার্থীর তথ্য সফলভাবে সংরক্ষণ করা হয়েছে!'
-                );
-
-                DB::commit();
-                $this->reset(); // ফর্ম রিসেট
-                return redirect()->route('student.index');
-            }
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            // কোনো ভুল হলে এরর পপ-আপ দেখাবে
-            $this->dispatch('swal',
-                icon: 'error',
-                message: 'দুঃখিত! তথ্য সংরক্ষণ করা সম্ভব হয়নি।'
-            );
+            // ✅ Redirect (no chaining)
+            return $this->redirectRoute('student.index', navigate: true);
         }
-    }
 
-    public function render()
-    {
-        return view('livewire.student-form')
-            ->with([
-            'classes' => StudentClass::where('is_active', true)
-                        ->pluck('class_name', 'id'),
-            'bloodGroups' => ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
-            'genders' => ['male' => 'Male', 'female' => 'Female', 'other' => 'Other'],
-            'religions' => ['Islam', 'Hinduism', 'Christianity', 'Buddhism', 'Other'],
-        ])->layout('components.layouts.admin');
+        Student::create($validatedData);
+
+        DB::commit();
+
+        // ✅ Flash message
+        session()->flash('success', 'নতুন শিক্ষার্থীর তথ্য সফলভাবে সংরক্ষণ করা হয়েছে!');
+
+        // ✅ Redirect (no chaining)
+        return $this->redirectRoute('student.index', navigate: true);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        logger()->error('Student save failed', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        $this->dispatch('swal',
+            icon: 'error',
+            message: 'শিক্ষার্থীর তথ্য সংরক্ষণ করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
+        );
     }
+}
+
+
+   public function render()
+{
+    $blood = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+
+    return view('livewire.student-form')->with([
+        'classes' => StudentClass::where('is_active', true)
+            ->pluck('class_name', 'class_name'),
+
+        'bloodGroups' => array_combine($blood, $blood), // ✅ associative
+
+        'genders' => ['male' => 'Male', 'female' => 'Female'],
+
+        'religions' => [
+            'Islam' => 'Islam',
+            'Hinduism' => 'Hinduism',
+            'Christianity' => 'Christianity',
+            'Buddhism' => 'Buddhism',
+            'Other' => 'Other',
+        ],
+    ])->layout('components.layouts.admin');
+}
+
 }

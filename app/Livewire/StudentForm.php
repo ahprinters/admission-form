@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Student;
 use Illuminate\Support\Facades\DB;
+use App\Models\StudentClass;
 
 class StudentForm extends Component
 {
@@ -97,6 +98,12 @@ class StudentForm extends Component
     public function render()
     {
         return view('livewire.student-form')
-            ->layout('components.layouts.admin');
+            ->with([
+            'classes' => StudentClass::where('is_active', true)
+                        ->pluck('class_name', 'id'),
+            'bloodGroups' => ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
+            'genders' => ['male' => 'Male', 'female' => 'Female', 'other' => 'Other'],
+            'religions' => ['Islam', 'Hinduism', 'Christianity', 'Buddhism', 'Other'],
+        ])->layout('components.layouts.admin');
     }
 }

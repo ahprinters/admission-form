@@ -4,13 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Teacher extends Model
+class Stream extends Model
 {
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        // অন্যান্য প্রয়োজনীয় ফিল্ডসমূহ
+        'stream_name',
+        'description',
     ];
 
     public function studentClasses()

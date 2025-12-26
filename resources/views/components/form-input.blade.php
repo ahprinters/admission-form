@@ -2,40 +2,56 @@
     'name',
     'label' => null,
     'type' => 'text',
-    'placeholder' => ''
+    'placeholder' => '',
+    // Livewire model binding property; defaults to $name
+    'model' => null,
+    // Optional help text under the input
+    'hint' => null,
 ])
+
+@php
+    // If the component is used for nested props like `filters.search`,
+    // the HTML id must be safe.
+    $id = str_replace(['.', '[', ']'], '-', $name);
+    $modelName = $model ?: $name;
+
+    // Allow overriding wire:model.* from the outside.
+    $wireModelAttr = collect($attributes->getAttributes())
+        ->keys()
+        ->first(fn($k) => str_starts_with($k, 'wire:model'));
+
+    $hasError = $errors->has($name);
+
+    $base = 'block w-full rounded-lg px-3 py-2 border transition focus:outline-none focus:ring-2';
+    $colors = 'bg-white text-gray-900 border-gray-300 placeholder-gray-400 '
+        .'dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:placeholder-gray-500';
+    $focus = $hasError
+        ? 'focus:ring-red-500 focus:border-red-500'
+        : 'focus:ring-indigo-500 focus:border-indigo-500';
+@endphp
 
 <div class="w-full">
     @if($label)
-        <label for="{{ $name }}" class="block text-sm font-medium text-gray-700 mb-1">
+        <label for="{{ $id }}" class="block text-sm font-medium text-gray-700 mb-1">
             {{ $label }}
         </label>
     @endif
 
-    <div class="relative">
-        <input
-            type="{{ $type }}"
-            id="{{ $name }}"
-            name="{{ $name }}"
-            placeholder="{{ $placeholder }}"
-            wire:model.blur="{{ $name }}"
-            {{ $attributes->merge([
-                'class' => 'block w-full rounded-md shadow-sm sm:text-sm transition duration-150 ease-in-out ' .
-                ($errors->has($name)
-                    ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500')
-            ]) }}
-        >
-    </div>
+    <input
+        type="{{ $type }}"
+        id="{{ $id }}"
+        placeholder="{{ $placeholder }}"
+        @if(!$wireModelAttr)
+            wire:model.live="{{ $modelName }}"
+        @endif
+        {{ $attributes->merge([
+            'class' => $base.' '.$colors.' '.$focus.($hasError ? ' border-red-300' : '')
+        ]) }}
+    >
+
+    @if($hint)
+        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $hint }}</div>
+    @endif
 
     <x-input-error :name="$name" />
 </div>
-
-
-{{-- <form wire:submit.prevent="save" class="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-
-    <x-form-input
-        name="name"
-        label="পুরো নাম"
-        placeholder="আপনার নাম লিখুন..."
-    / --}}

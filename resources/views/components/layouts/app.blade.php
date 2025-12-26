@@ -6,7 +6,6 @@
     <title>{{ $title ?? 'Admission Form' }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     @fluxAppearance
@@ -16,15 +15,6 @@
     @livewireScripts
     @fluxScripts()
 
-<script>
-    window.addEventListener('swal:modal', event => {
-        Swal.fire({
-            icon: event.detail.icon,
-            title: event.detail.message,
-            showConfirmButton: false,
-            timer: 1500
-        });
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

@@ -4,43 +4,35 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Student;
-use Illuminate\Support\Facades\DB;
 use App\Models\StudentClass;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class StudentForm extends Component
 {
     public $studentId;
 
-    // প্রোপার্টিজ
     public $name_en, $name_bn, $email, $class, $roll_number, $gender;
     public $phone, $date_of_birth, $nid_birth_certificate, $blood_group;
     public $nationality = 'Bangladeshi', $religion, $address, $is_active = true;
 
-    // ভ্যালিডেশন রুলস (এক জায়গায় রাখা ভালো)
     protected function rules()
     {
         return [
-            'name_en'               => 'required|min:3',
-            'name_bn'               => 'required|min:3',
-            'email'                 => 'required|email|unique:students,email,' . ($this->studentId ?? 'NULL'),
-            'class'                 => 'required',
-            'roll_number'           => 'required',
-            'gender'                => 'required|in:male,female',
-            'phone'                 => 'required|string|max:15',
-            'date_of_birth'         => 'nullable|date',
+            'name_en' => 'required|min:3',
+            'name_bn' => 'required|min:3',
+            'email' => ['required', 'email', Rule::unique('students', 'email')->ignore($this->studentId)],
+            'class' => 'required',
+            'roll_number' => 'required',
+            'gender' => 'required|in:male,female',
+            'phone' => 'required|string|max:15',
+            'date_of_birth' => 'nullable|date',
             'nid_birth_certificate' => 'nullable|string',
-            'blood_group'           => 'required',
-            'religion'              => 'required',
-            'nationality'           => 'nullable|string',
-            'address'               => 'nullable|string',
-            'is_active'             => 'boolean',
+            'blood_group' => 'required',
+            'religion' => 'required',
+            'nationality' => 'nullable|string',
+            'address' => 'nullable|string',
         ];
-    }
-
-    // রিয়েল-টাইম ভ্যালিডেশন
-    public function updated($propertyName)
-    {
-        $this->validateOnly($propertyName);
     }
 
     public function mount($id = null)
@@ -48,75 +40,77 @@ class StudentForm extends Component
         if ($id) {
             $student = Student::findOrFail($id);
             $this->studentId = $student->id;
-            $this->fill($student->toArray()); // fill() ব্যবহার করলে কোড অনেক ছোট হয়
+            $this->fill($student->toArray());
         }
     }
-
-   public function submit()
+    public function submit()
 {
-    $validatedData = $this->validate();
+    $validated = $this->validate();
+
+    DB::beginTransaction();
 
     try {
-        DB::beginTransaction();
-
         if ($this->studentId) {
-            Student::findOrFail($this->studentId)->update($validatedData);
+            $student = Student::findOrFail($this->studentId);
 
-            DB::commit();
+            // যদি already submitted হয়, এডিট ব্লক করতে চাইলে:
+            if ($student->status === 'submitted') {
+                DB::rollBack();
 
-            // ✅ Flash message
-            session()->flash('success', 'শিক্ষার্থীর তথ্য সফলভাবে আপডেট করা হয়েছে!');
+                $this->dispatch('toast', type: 'error', message: 'এই আবেদনটি লক করা আছে। এডিট করা যাবে না।');
+                return;
+            }
 
-            // ✅ Redirect (no chaining)
-            return $this->redirectRoute('student.index', navigate: true);
+            $student->update($validated);
+        } else {
+            // ✅ নতুন Student create
+            $student = Student::create($validated);
         }
 
-        Student::create($validatedData);
+        // ✅ MUST: Step-2 এ যাওয়ার জন্য current_step সেট করুন
+        $student->update([
+            'current_step' => 2,
+            // status না থাকলে চাইলে default দিন
+            'status' => $student->status ?: 'draft',
+        ]);
 
         DB::commit();
 
-        // ✅ Flash message
-        session()->flash('success', 'নতুন শিক্ষার্থীর তথ্য সফলভাবে সংরক্ষণ করা হয়েছে!');
+        // ✅ Step-2 Wizard page এ redirect
+        return redirect()->route('students.admission', $student->id);
 
-        // ✅ Redirect (no chaining)
-        return $this->redirectRoute('student.index', navigate: true);
-
-    } catch (\Exception $e) {
+        } catch (\Throwable $e) {
         DB::rollBack();
 
-        logger()->error('Student save failed', [
+        logger()->error('Student create/update failed', [
             'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
         ]);
 
-        $this->dispatch('swal',
-            icon: 'error',
-            message: 'শিক্ষার্থীর তথ্য সংরক্ষণ করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
-        );
+            $this->dispatch('toast', type: 'error', message: 'তথ্য সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।');
+        }
     }
-}
 
 
-   public function render()
-{
-    $blood = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
-    return view('livewire.student-form')->with([
-        'classes' => StudentClass::where('is_active', true)
-            ->pluck('class_name', 'class_name'),
+    public function render()
+    {
+        return view('livewire.student-form', [
+            'classes' => StudentClass::where('is_active', true)
+                ->pluck('class_name', 'class_name'),
 
-        'bloodGroups' => array_combine($blood, $blood), // ✅ associative
+            'bloodGroups' => ['A+','A-','B+','B-','O+','O-','AB+','AB-'],
 
-        'genders' => ['male' => 'Male', 'female' => 'Female'],
+            'genders' => [
+                'male' => 'Male',
+                'female' => 'Female',
+            ],
 
-        'religions' => [
-            'Islam' => 'Islam',
-            'Hinduism' => 'Hinduism',
-            'Christianity' => 'Christianity',
-            'Buddhism' => 'Buddhism',
-            'Other' => 'Other',
-        ],
-    ])->layout('components.layouts.admin');
-}
-
+            'religions' => [
+                'Islam' => 'Islam',
+                'Hinduism' => 'Hinduism',
+                'Christianity' => 'Christianity',
+                'Buddhism' => 'Buddhism',
+            ],
+        ])->layout('components.layouts.admin');
+    }
 }

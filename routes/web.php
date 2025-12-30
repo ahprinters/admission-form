@@ -9,6 +9,10 @@ use App\Livewire\StudentList;
 use App\Livewire\Admission\StudentAdmissionWizard;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdmissionPdfController;
+use App\Livewire\ExamManager;
+use App\Livewire\SessionManager;
+use App\Livewire\CourseManager;
+  use App\Livewire\SemesterManager;
 
 
 Route::get('/', function () {
@@ -33,6 +37,20 @@ Route::middleware(['auth'])->group(function () {
     // Admission Wizard (Step-2..8)
     Route::get('/students/{student}/admission', StudentAdmissionWizard::class)
         ->name('students.admission');
+
+    // exam manager
+    Route::get('/exams', ExamManager::class)->name('livewire.exam-manager');
+
+    // session manager
+    Route::get('/academic-sessions', SessionManager::class)->name('academic-sessions.index');
+
+    // course manager
+    Route::get('/courses', CourseManager::class)->name('courses.index');
+
+    //semester manager
+
+    Route::get('/semesters', SemesterManager::class)->name('semesters.index');
+
 
    // DOMPDF
     Route::post('/students/{student}/admission/pdf/generate', [AdmissionPdfController::class, 'generate'])

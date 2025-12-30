@@ -29,6 +29,41 @@
             <x-student-management />
             {{-- ক্লাস ম্যানেজমেন্ট কম্পোনেন্ট --}}
             <x-class-management />
+            {{-- এক্সাম ম্যানেজমেন্ট --}}
+            <flux:sidebar.item
+                icon="clipboard-document"
+                href="{{ route('livewire.exam-manager') }}"
+                :current="request()->routeIs('livewire.exam-manager')"
+            >
+                Exam Manager
+            </flux:sidebar.item>
+
+            <flux:sidebar.item
+                icon="academic-cap"
+                href="{{ route('academic-sessions.index') }}"
+                :current="request()->routeIs('academic-sessions.index')"
+            >
+                Academic Sessions
+            </flux:sidebar.item>
+
+            <flux:sidebar.item
+                icon="book-open"
+                href="{{ route('courses.index') }}"
+                :current="request()->routeIs('courses.index')"
+            >
+                Courses
+            </flux:sidebar.item>
+
+
+            {{-- সিমেস্টার ম্যানেজার --}}
+            <flux:sidebar.item
+                icon="calendar-days"
+                href="{{ route('semesters.index') }}"
+                :current="request()->routeIs('semesters.index')"
+            >
+                Semesters
+            </flux:sidebar.item>
+
             {{-- একাডেমিক সেকশন --}}
             <flux:sidebar.group heading="একাডেমিক">
                 <flux:sidebar.item icon="clipboard-document-list" href="/attendance" wire:navigate :current="request()->is('attendance')">

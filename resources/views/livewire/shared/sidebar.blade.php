@@ -29,10 +29,12 @@
             <x-student-management />
             {{-- ক্লাস ম্যানেজমেন্ট কম্পোনেন্ট --}}
             <x-class-management />
+
             {{-- এক্সাম ম্যানেজমেন্ট --}}
             <flux:sidebar.item
                 icon="clipboard-document"
                 href="{{ route('livewire.exam-manager') }}"
+                wire:navigate
                 :current="request()->routeIs('livewire.exam-manager')"
             >
                 Exam Manager
@@ -41,6 +43,7 @@
             <flux:sidebar.item
                 icon="academic-cap"
                 href="{{ route('academic-sessions.index') }}"
+                wire:navigate
                 :current="request()->routeIs('academic-sessions.index')"
             >
                 Academic Sessions
@@ -49,28 +52,58 @@
             <flux:sidebar.item
                 icon="book-open"
                 href="{{ route('courses.index') }}"
+                wire:navigate
                 :current="request()->routeIs('courses.index')"
             >
                 Courses
             </flux:sidebar.item>
 
-
             {{-- সিমেস্টার ম্যানেজার --}}
             <flux:sidebar.item
                 icon="calendar-days"
                 href="{{ route('semesters.index') }}"
+                wire:navigate
                 :current="request()->routeIs('semesters.index')"
             >
                 Semesters
             </flux:sidebar.item>
 
+            {{-- ওয়েবসাইট সেটিংস --}}
+            <flux:sidebar.group heading="ওয়েবসাইট সেটিংস">
+                <flux:sidebar.item
+                    icon="megaphone"
+                    href="{{ route('admin.marquees') }}"
+                    wire:navigate
+                    :current="request()->routeIs('admin.marquees')"
+                >
+                    Marquee Manager
+                </flux:sidebar.item>
+            </flux:sidebar.group>
+
             {{-- একাডেমিক সেকশন --}}
             <flux:sidebar.group heading="একাডেমিক">
-                <flux:sidebar.item icon="clipboard-document-list" href="/attendance" wire:navigate :current="request()->is('attendance')">
+                <flux:sidebar.item
+                    icon="clipboard-document-list"
+                    href="/attendance"
+                    wire:navigate
+                    :current="request()->is('attendance')"
+                >
                     Attendance
                 </flux:sidebar.item>
-                <flux:sidebar.item icon="calendar-days" href="#">ক্যালেন্ডার</flux:sidebar.item>
-                <flux:sidebar.item icon="clipboard-document-check" href="#">ফলাফল</flux:sidebar.item>
+
+                <flux:sidebar.item
+                    icon="calendar-days"
+                    href="#"
+                >
+                    ক্যালেন্ডার
+                </flux:sidebar.item>
+
+                <flux:sidebar.item
+                    icon="clipboard-document-check"
+                    href="#"
+                >
+                    ফলাফল
+                </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
@@ -78,10 +111,14 @@
 
         {{-- সেটিংস এবং ডার্ক মোড অপশন --}}
         <flux:sidebar.nav>
-            <flux:sidebar.item icon="cog-8-tooth" href="#">সেটিংস</flux:sidebar.item>
+            <flux:sidebar.item icon="cog-8-tooth" href="#" wire:navigate>
+                সেটিংস
+            </flux:sidebar.item>
 
             {{-- ডার্ক মোড টগল (যদি অ্যাপে সেটআপ থাকে) --}}
-            <flux:sidebar.item icon="moon" @click="$flux.dark = ! $flux.dark">থিম পরিবর্তন</flux:sidebar.item>
+            <flux:sidebar.item icon="moon" @click="$flux.dark = ! $flux.dark">
+                থিম পরিবর্তন
+            </flux:sidebar.item>
         </flux:sidebar.nav>
 
         {{-- প্রোফাইল সেকশন --}}
@@ -113,7 +150,12 @@
     <flux:header class="lg:hidden border-b border-zinc-200 dark:border-zinc-700">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-3" inset="left" />
 
-        <flux:brand href="/dashboard" logo="https://fluxui.dev/img/demo/logo.png" name="Admin" class="ml-2" />
+        <flux:brand
+            href="/dashboard"
+            logo="https://fluxui.dev/img/demo/logo.png"
+            name="Admin"
+            class="ml-2"
+        />
 
         <flux:spacer />
 

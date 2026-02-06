@@ -1,24 +1,27 @@
 <?php
 
+use App\Livewire\HomePage;
 use App\Livewire\Dashboard;
 use App\Livewire\Auth\Login;
+use App\Livewire\ExamManager;
 use App\Livewire\StudentForm;
-use App\Livewire\Admin\ClassesIndex;
-use App\Livewire\Admin\AddClass;
 use App\Livewire\StudentList;
-use App\Livewire\Admission\StudentAdmissionWizard;
+use App\Livewire\CourseManager;
+use App\Livewire\Admin\AddClass;
+use App\Livewire\SessionManager;
+use App\Livewire\SemesterManager;
+use App\Livewire\Admin\ClassesIndex;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdmissionPdfController;
-use App\Livewire\ExamManager;
-use App\Livewire\SessionManager;
-use App\Livewire\CourseManager;
-  use App\Livewire\SemesterManager;
+use App\Livewire\Admission\StudentAdmissionWizard;
+use App\Livewire\Admin\MarqueeManager;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
+Route::get('/', HomePage::class);
 Route::get('/login', Login::class)->name('login')->middleware('guest');
 
 Route::middleware(['auth'])->group(function () {
@@ -50,6 +53,9 @@ Route::middleware(['auth'])->group(function () {
     //semester manager
 
     Route::get('/semesters', SemesterManager::class)->name('semesters.index');
+
+    // marquee manager
+    Route::get('/admin/marquees', MarqueeManager::class)->name('admin.marquees');
 
 
    // DOMPDF

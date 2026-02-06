@@ -4,9 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 class StudentClass extends Model
+
 {
+        use HasFactory;
+
     protected $fillable = [
         'class_name',
         'class_code',
@@ -18,6 +23,12 @@ class StudentClass extends Model
     ];
 
     // সম্পর্কগুলো
+
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class);
+    }
+
     public function grade(): BelongsTo
     {
         return $this->belongsTo(Grade::class);
@@ -32,4 +43,5 @@ class StudentClass extends Model
     {
         return $this->belongsTo(Teacher::class);
     }
+
 }

@@ -7,34 +7,41 @@ use App\Models\Grade;
 use App\Models\Stream;
 use App\Models\Teacher;
 use App\Models\StudentClass;
+use App\Models\AcademicYear;
 
 class AddClass extends Component
 {
-    public $grade;
+    // Form fields (FK aligned)
+    public $grade_id;
     public $class_name;
     public $class_code;
-    public $stream;
-    public $teacher;
-    public $year;
+    public $stream_id;
+    public $teacher_id;
+    public $academic_year_id;
 
+    // Dropdown data
     public $grades;
     public $streams;
     public $teachers;
+    public $academicYears;
 
     public function mount()
     {
-        $this->grades = Grade::all();
-        $this->streams = Stream::all();
-        $this->teachers = Teacher::all();
+        $this->grades        = Grade::orderBy('id')->get();
+        $this->streams       = Stream::orderBy('id')->get();
+        $this->teachers      = Teacher::orderBy('id')->get();
+        $this->academicYears = AcademicYear::where('is_active', true)
+                                ->orderBy('start_year', 'desc')
+                                ->get();
     }
 
     protected $rules = [
-        'grade'      => 'required|exists:grades,id',
-        'class_name' => 'required|string|max:255',
-        'class_code' => 'required|string|max:50|unique:student_classes,class_code',
-        'stream'     => 'required|exists:streams,id',
-        'teacher'    => 'required|exists:teachers,id',
-        'year'       => 'required|integer',
+        'grade_id'          => 'required|exists:grades,id',
+        'class_name'        => 'required|string|max:255',
+        'class_code'        => 'required|string|max:50|unique:student_classes,class_code',
+        'stream_id'         => 'nullable|exists:streams,id',
+        'teacher_id'        => 'nullable|exists:teachers,id',
+        'academic_year_id'  => 'required|exists:academic_years,id',
     ];
 
     public function submit()
@@ -42,20 +49,28 @@ class AddClass extends Component
         $this->validate();
 
         StudentClass::create([
-            'grade_id' => $this->grade,
-            'class_name' => $this->class_name,
-            'class_code' => $this->class_code,
-            'stream_id' => $this->stream,
-            'teacher_id' => $this->teacher,
-            'year' => $this->year,
+            'grade_id'         => $this->grade_id,
+            'class_name'       => $this->class_name,
+            'class_code'       => $this->class_code,
+            'stream_id'        => $this->stream_id,
+            'teacher_id'       => $this->teacher_id,
+            'academic_year_id' => $this->academic_year_id,
         ]);
 
-        $this->reset(['grade','class_name','class_code','stream','teacher','year']);
+        $this->reset([
+            'grade_id',
+            'class_name',
+            'class_code',
+            'stream_id',
+            'teacher_id',
+            'academic_year_id'
+        ]);
 
         $this->dispatch('swal', [
-            'icon' => 'success',
+            'icon'    => 'success',
             'message' => 'Class added successfully!'
         ]);
+
         return redirect()->route('admin.classes.index');
     }
 

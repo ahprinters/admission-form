@@ -41,13 +41,15 @@
             placeholder="নির্বাচন করুন"
         />
 
-        <!-- Year -->
+        <!-- academic_year_id -->
         <x-form-select
-            name="year"
-            label="Year"
-            :options="collect(range(date('Y')-3, date('Y')+3))->mapWithKeys(fn($y) => [$y => $y])"
+            name="academic_year_id"
+            label="Academic Year"
+            :options="$academicYears->pluck('name', 'id')"
             placeholder="নির্বাচন করুন"
         />
+
+
 
         <!-- Submit Button -->
         <x-submit-button target="submit" text="Add Class" />

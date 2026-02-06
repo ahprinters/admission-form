@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
             GradeSeeder::class,
             StreamSeeder::class,
             TeacherSeeder::class,
-            StudentClassSeeder::class,
+            StudentClassesSeeder::class,
         ]);
     }
 }

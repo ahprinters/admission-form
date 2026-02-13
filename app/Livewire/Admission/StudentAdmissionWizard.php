@@ -6,7 +6,9 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\Student;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.admin')]
 class StudentAdmissionWizard extends Component
 {
     public Student $student;
@@ -54,10 +56,6 @@ class StudentAdmissionWizard extends Component
         }
     }
 
-    /**
-     * Request save from wizard footer
-     * $mode: next | draft
-     */
     public function requestSave(string $mode): void
     {
         if ($this->locked) return;
@@ -67,18 +65,13 @@ class StudentAdmissionWizard extends Component
             $mode = 'next';
         }
 
-        // ✅ Draft only allowed on last step (extra safety)
         if ($mode === 'draft' && $this->step !== $this->maxStep) {
             return;
         }
 
-        // Step component will listen and save itself
         $this->dispatch('wizard-save-request', step: $this->step, mode: $mode);
     }
 
-    /**
-     * Step components dispatch: wizard-step-saved(savedStep, mode)
-     */
     #[On('wizard-step-saved')]
     public function onStepSaved(int $savedStep, string $mode = 'next'): void
     {
@@ -90,19 +83,13 @@ class StudentAdmissionWizard extends Component
             return;
         }
 
-        // draft
         $this->dispatch('toast', message: 'Draft saved!');
     }
 
-    /**
-     * Final submit (lock the wizard)
-     * Runs only from Step-8 footer button
-     */
     public function finalSubmit(): void
     {
         if ($this->locked) return;
 
-        // (Optional) enforce last step only
         if ($this->step !== $this->maxStep) {
             $this->dispatch('toast', message: 'Final submit শুধু শেষ ধাপে করা যাবে।');
             return;
@@ -115,7 +102,6 @@ class StudentAdmissionWizard extends Component
             ]);
         });
 
-        // ✅ refresh so locked updates instantly
         $this->student->refresh();
 
         $this->dispatch('toast', message: 'Final submit complete!');
@@ -123,7 +109,6 @@ class StudentAdmissionWizard extends Component
 
     public function render()
     {
-        return view('livewire.admission.student-admission-wizard')
-            ->layout('components.layouts.admin');
+        return view('livewire.admission.student-admission-wizard');
     }
 }

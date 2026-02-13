@@ -1,114 +1,77 @@
-<?php
+<div class="max-w-6xl mx-auto space-y-4">
 
-namespace App\Livewire\Admission;
+    {{-- Header --}}
+    <flux:card>
+        <flux:header title="Student Admission Wizard" subtitle="Student: {{ $student->name_en }} • Status: {{ $student->status }}">
+            @if($this->locked)
+                <span class="ml-2 text-red-600 font-semibold">Locked (No Edit)</span>
+            @endif
 
-use Livewire\Component;
-use Livewire\Attributes\On;
-use App\Models\Student;
-use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\Layout;
+            <flux:actions>
+                <flux:button href="{{ route('student.index') }}" variant="outline">Back to List</flux:button>
+            </flux:actions>
+        </flux:header>
 
-#[Layout('components.layouts.admin')]
-class StudentAdmissionWizard extends Component
-{
-    public Student $student;
+        {{-- Step Nav --}}
+        <flux:nav>
+            @for($i = 2; $i <= 8; $i++)
+                <flux:button
+                    wire:click="goToStep({{ $i }})"
+                    :disabled="$this->locked"
+                    :variant="$step === $i ? 'secondary' : 'ghost'"
+                >
+                    Step {{ $i }}
+                </flux:button>
+            @endfor
+        </flux:nav>
+    </flux:card>
 
-    // Wizard steps: 2..8 (Step-1 আলাদা: StudentForm)
-    public int $step = 2;
+    {{-- Body --}}
+    <flux:card>
+        @switch($step)
+            @case(2) <livewire:admission.steps.step2-guardian :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(3) <livewire:admission.steps.step3-category :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(4) <livewire:admission.steps.step4-previous-education :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(5) <livewire:admission.steps.step5-declaration :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(6) <livewire:admission.steps.step6-pdf :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(7) <livewire:admission.steps.step7-office :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(8) <livewire:admission.steps.step8-documents :studentId="$student->id" :locked="$this->locked" /> @break
+            @default <flux:text muted>Invalid step.</flux:text>
+        @endswitch
+    </flux:card>
 
-    private int $minStep = 2;
-    private int $maxStep = 8;
+    {{-- Footer Actions --}}
+    <flux:card class="flex items-center justify-between">
+        <flux:text muted>
+            @if($this->locked)
+                Locked — Final submit করা হয়েছে। এডিট করা যাবে না।
+            @else
+                Step {{ $step }} of 8
+            @endif
+        </flux:text>
 
-    public function mount(Student $student): void
-    {
-        $this->student = $student;
+        <flux:actions>
+            <flux:button wire:click="back" variant="ghost" :disabled="$this->locked || $step === 2">Back</flux:button>
 
-        $current = (int) ($this->student->current_step ?: $this->minStep);
-        $this->step = $this->clampStep($current);
-    }
+            @if($step < 8)
+                <flux:button wire:click="requestSave('next')" variant="primary" :disabled="$this->locked" wire:loading.attr="disabled">
+                    <span wire:loading.remove>Save & Next</span>
+                    <span wire:loading>Saving...</span>
+                </flux:button>
+            @endif
 
-    public function getLockedProperty(): bool
-    {
-        return $this->student->status === 'submitted';
-    }
+            @if($step === 8)
+                <flux:button wire:click="requestSave('draft')" variant="ghost" :disabled="$this->locked" wire:loading.attr="disabled">
+                    <span wire:loading.remove>Save as Draft</span>
+                    <span wire:loading>Saving...</span>
+                </flux:button>
 
-    private function clampStep(int $step): int
-    {
-        return max($this->minStep, min($this->maxStep, $step));
-    }
+                <flux:button wire:click="finalSubmit" variant="primary" :disabled="$this->locked" wire:loading.attr="disabled">
+                    <span wire:loading.remove>Final Submit</span>
+                    <span wire:loading>Submitting...</span>
+                </flux:button>
+            @endif
+        </flux:actions>
+    </flux:card>
 
-    public function goToStep(int $to): void
-    {
-        if ($this->locked) return;
-
-        $to = $this->clampStep($to);
-        $this->step = $to;
-
-        $this->student->update(['current_step' => $this->step]);
-    }
-
-    public function back(): void
-    {
-        if ($this->locked) return;
-
-        if ($this->step > $this->minStep) {
-            $this->goToStep($this->step - 1);
-        }
-    }
-
-    public function requestSave(string $mode): void
-    {
-        if ($this->locked) return;
-
-        $mode = strtolower(trim($mode));
-        if (! in_array($mode, ['next', 'draft'], true)) {
-            $mode = 'next';
-        }
-
-        if ($mode === 'draft' && $this->step !== $this->maxStep) {
-            return;
-        }
-
-        $this->dispatch('wizard-save-request', step: $this->step, mode: $mode);
-    }
-
-    #[On('wizard-step-saved')]
-    public function onStepSaved(int $savedStep, string $mode = 'next'): void
-    {
-        $savedStep = $this->clampStep($savedStep);
-        $mode = strtolower(trim($mode));
-
-        if ($mode === 'next') {
-            $this->goToStep($this->clampStep($savedStep + 1));
-            return;
-        }
-
-        $this->dispatch('toast', message: 'Draft saved!');
-    }
-
-    public function finalSubmit(): void
-    {
-        if ($this->locked) return;
-
-        if ($this->step !== $this->maxStep) {
-            $this->dispatch('toast', message: 'Final submit শুধু শেষ ধাপে করা যাবে।');
-            return;
-        }
-
-        DB::transaction(function () {
-            $this->student->update([
-                'status' => 'submitted',
-                'submitted_at' => now(),
-            ]);
-        });
-
-        $this->student->refresh();
-
-        $this->dispatch('toast', message: 'Final submit complete!');
-    }
-
-    public function render()
-    {
-        return view('livewire.admission.student-admission-wizard');
-    }
-}
+</div>

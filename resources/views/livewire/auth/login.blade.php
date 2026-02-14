@@ -1,23 +1,46 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-lg">
-        <h2 class="text-2xl font-bold text-center mb-6">অ্যাডমিন লগইন</h2>
-        <form wire:submit.prevent="login">
-            <div class="mb-4">
-                <label class="block text-gray-700">ইমেইল</label>
-                <input type="email" wire:model="email" class="w-full border p-2 rounded mt-1">
-                @error('email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">পাসওয়ার্ড</label>
-                <input type="password" wire:model="password" class="w-full border p-2 rounded mt-1">
-            </div>
-            <div class="mb-4">
-                <label class="inline-flex items-center">
-                    <input type="checkbox" wire:model="remember" class="form-checkbox">
-                    <span class="ml-2 text-sm text-gray-600">মনে রাখুন</span>
-                </label>
-            </div>
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">প্রবেশ করুন</button>
-        </form>
+<x-ui.card class="space-y-6">
+
+    {{-- ✅ Success Message --}}
+    @if (session()->has('success'))
+        <div
+            x-data="{ show: true }"
+            x-show="show"
+            x-init="setTimeout(() => show = false, 4000)"
+            class="p-3 rounded-lg bg-green-100 text-green-700 border border-green-300 text-sm">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <div class="text-center space-y-2">
+        <h2 class="text-2xl font-bold">অ্যাডমিন লগইন</h2>
+        <p class="text-sm text-gray-600">Secure Admission Panel</p>
     </div>
-</div>
+
+    <form wire:submit.prevent="login" class="space-y-5">
+
+        <x-ui.input label="ইমেইল" type="email" wire:model.defer="email" />
+        <x-ui.input label="পাসওয়ার্ড" type="password" wire:model.defer="password" />
+
+        <div class="flex justify-between items-center text-sm">
+            <x-ui.checkbox wire:model.defer="remember" label="মনে রাখুন" />
+            <a href="#" class="text-blue-600 hover:underline">
+                Forgot?
+            </a>
+        </div>
+
+        <x-ui.button type="submit">
+            প্রবেশ করুন
+        </x-ui.button>
+
+        <div class="text-center">
+            <a href="{{ route('auth.register') }}"
+               class="text-blue-600 hover:underline text-sm">
+                রেজিস্টার
+            </a>
+        </div>
+
+    </form>
+
+</x-ui.card>
+
+

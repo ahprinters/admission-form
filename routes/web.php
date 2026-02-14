@@ -3,6 +3,7 @@
 use App\Livewire\HomePage;
 use App\Livewire\Dashboard;
 use App\Livewire\Auth\Login;
+use App\Livewire\Auth\Register;
 use App\Livewire\ExamManager;
 use App\Livewire\StudentForm;
 use App\Livewire\StudentList;
@@ -17,12 +18,16 @@ use App\Livewire\Admission\StudentAdmissionWizard;
 use App\Livewire\Admin\MarqueeManager;
 
 
+
 // Route::get('/', function () {
 //     return view('welcome');
 // });
 
 Route::get('/', HomePage::class);
-Route::get('/login', Login::class)->name('login')->middleware('guest');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', Login::class)->name('login');
+    Route::get('/register', Register::class)->name('auth.register');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');

@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Rule;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Layout;
+#[Layout('components.layouts.auth')]
 
 
 class Login extends Component
@@ -27,7 +29,7 @@ class Login extends Component
             session()->regenerate();
 
             // লগইন সফল হলে ড্যাশবোর্ডে রিডাইরেক্ট
-            return redirect()->intended('/dashboard');
+            return $this->redirectIntended('/dashboard', navigate: true);
         }
 
         // লগইন ব্যর্থ হলে এরর মেসেজ
@@ -46,6 +48,6 @@ class Login extends Component
     }
     public function render()
     {
-        return view('livewire.auth.login')->layout('components.layouts.app');
+        return view('livewire.auth.login');
     }
 }

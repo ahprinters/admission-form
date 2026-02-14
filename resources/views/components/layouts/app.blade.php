@@ -7,22 +7,20 @@
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600&display=swap" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-    @fluxAppearance
 </head>
 
 <body class="bg-slate-50 dark:bg-slate-950">
+
     {{ $slot }}
 
-    {{-- ✅ Toast (Alpine based) --}}
     <x-toast />
 
     @livewireScripts
-    @fluxScripts()
 
-    {{-- (Optional) SweetAlert2 - যদি আপনার swal window event দরকার হয় --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

@@ -1,170 +1,77 @@
-<div class="max-w-6xl mx-auto p-4 space-y-4">
+<div class="max-w-6xl mx-auto space-y-4">
 
     {{-- Header --}}
-    <div class="bg-white border rounded-2xl p-4">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <flux:heading size="lg" level="2">Student Admission Wizard</flux:heading>
+    <flux:card>
+        <flux:header title="Student Admission Wizard" subtitle="Student: {{ $student->name_en }} • Status: {{ $student->status }}">
+            @if($this->locked)
+                <span class="ml-2 text-red-600 font-semibold">Locked (No Edit)</span>
+            @endif
 
-                <flux:subheading>
-                    Student: <span class="font-semibold">{{ $student->name_en }}</span>
-                    <span class="mx-2">•</span>
-                    Status: <span class="font-semibold">{{ $student->status }}</span>
-
-                    @if($this->locked)
-                        <span class="ml-2 text-red-600 font-semibold">Locked (No Edit)</span>
-                    @endif
-                </flux:subheading>
-            </div>
-
-            <div class="flex gap-2">
-                <a class="px-3 py-2 rounded-xl border text-sm" href="{{ route('student.index') }}">
-                    Back to List
-                </a>
-            </div>
-        </div>
+            <flux:actions>
+                <flux:button href="{{ route('student.index') }}" variant="outline">Back to List</flux:button>
+            </flux:actions>
+        </flux:header>
 
         {{-- Step Nav --}}
-        @php
-            $firstStep = 2;
-            $lastStep  = 8;
-        @endphp
-
-        <div class="mt-4 flex flex-wrap gap-2">
-            @for($i = $firstStep; $i <= $lastStep; $i++)
-                <button
-                    type="button"
-                    class="px-3 py-2 rounded-xl border text-sm
-                           {{ $step === $i ? 'bg-gray-50 font-semibold' : 'hover:bg-gray-50' }}
-                           {{ $this->locked ? 'opacity-60 cursor-not-allowed' : '' }}"
-                    @if($this->locked) disabled @endif
+        <flux:nav>
+            @for($i = 2; $i <= 8; $i++)
+                <flux:button
                     wire:click="goToStep({{ $i }})"
+                    :disabled="$this->locked"
+                    :variant="$step === $i ? 'secondary' : 'ghost'"
                 >
                     Step {{ $i }}
-                </button>
+                </flux:button>
             @endfor
-        </div>
-    </div>
+        </flux:nav>
+    </flux:card>
 
     {{-- Body --}}
-    <div class="bg-white border rounded-2xl p-5">
+    <flux:card>
         @switch($step)
-
-            @case(2)
-                <livewire:admission.steps.step2-guardian
-                    :studentId="$student->id"
-                    :locked="$this->locked"
-                    wire:key="s2-{{ $student->id }}" />
-                @break
-
-            @case(3)
-                <livewire:admission.steps.step3-category
-                    :studentId="$student->id"
-                    :locked="$this->locked"
-                    wire:key="s3-{{ $student->id }}" />
-                @break
-
-            @case(4)
-                <livewire:admission.steps.step4-previous-education
-                    :studentId="$student->id"
-                    :locked="$this->locked"
-                    wire:key="s4-{{ $student->id }}" />
-                @break
-
-            @case(5)
-                <livewire:admission.steps.step5-declaration
-                    :studentId="$student->id"
-                    :locked="$this->locked"
-                    wire:key="s5-{{ $student->id }}" />
-                @break
-
-            @case(6)
-                <livewire:admission.steps.step6-pdf
-                    :studentId="$student->id"
-                    :locked="$this->locked"
-                    wire:key="s6-{{ $student->id }}" />
-                @break
-
-            @case(7)
-                <livewire:admission.steps.step7-office
-                    :studentId="$student->id"
-                    :locked="$this->locked"
-                    wire:key="s7-{{ $student->id }}" />
-                @break
-
-            @case(8)
-                <livewire:admission.steps.step8-documents
-                    :studentId="$student->id"
-                    :locked="$this->locked"
-                    wire:key="s8-{{ $student->id }}" />
-                @break
-
-            @default
-                <div class="text-sm text-slate-600">Invalid step.</div>
+            @case(2) <livewire:admission.steps.step2-guardian :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(3) <livewire:admission.steps.step3-category :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(4) <livewire:admission.steps.step4-previous-education :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(5) <livewire:admission.steps.step5-declaration :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(6) <livewire:admission.steps.step6-pdf :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(7) <livewire:admission.steps.step7-office :studentId="$student->id" :locked="$this->locked" /> @break
+            @case(8) <livewire:admission.steps.step8-documents :studentId="$student->id" :locked="$this->locked" /> @break
+            @default <flux:text muted>Invalid step.</flux:text>
         @endswitch
-    </div>
+    </flux:card>
 
     {{-- Footer Actions --}}
-    <div class="bg-white border rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
-        <div class="text-sm text-slate-500">
+    <flux:card class="flex items-center justify-between">
+        <flux:text muted>
             @if($this->locked)
                 Locked — Final submit করা হয়েছে। এডিট করা যাবে না।
             @else
-                Step {{ $step }} of {{ $lastStep }}
+                Step {{ $step }} of 8
             @endif
-        </div>
+        </flux:text>
 
-        <div class="flex gap-2">
-            {{-- Back --}}
-            <flux:button
-                type="button"
-                variant="ghost"
-                wire:click="back"
-                :disabled="$this->locked || $step === $firstStep"
-            >
-                Back
-            </flux:button>
+        <flux:actions>
+            <flux:button wire:click="back" variant="ghost" :disabled="$this->locked || $step === 2">Back</flux:button>
 
-            {{-- Step 2-7: Save & Next --}}
-            @if($step < $lastStep)
-                <flux:button
-                    type="button"
-                    variant="primary"
-                    wire:click="requestSave('next')"
-                    :disabled="$this->locked"
-                    wire:loading.attr="disabled"
-                >
+            @if($step < 8)
+                <flux:button wire:click="requestSave('next')" variant="primary" :disabled="$this->locked" wire:loading.attr="disabled">
                     <span wire:loading.remove>Save & Next</span>
                     <span wire:loading>Saving...</span>
                 </flux:button>
             @endif
 
-            {{-- Step 8: Draft + Final Submit --}}
-            @if($step === $lastStep)
-                <flux:button
-                    type="button"
-                    variant="ghost"
-                    class="border border-slate-200"
-                    wire:click="requestSave('draft')"
-                    :disabled="$this->locked"
-                    wire:loading.attr="disabled"
-                >
+            @if($step === 8)
+                <flux:button wire:click="requestSave('draft')" variant="ghost" :disabled="$this->locked" wire:loading.attr="disabled">
                     <span wire:loading.remove>Save as Draft</span>
                     <span wire:loading>Saving...</span>
                 </flux:button>
 
-                <flux:button
-                    type="button"
-                    variant="primary"
-                    wire:click="finalSubmit"
-                    :disabled="$this->locked"
-                    wire:loading.attr="disabled"
-                >
+                <flux:button wire:click="finalSubmit" variant="primary" :disabled="$this->locked" wire:loading.attr="disabled">
                     <span wire:loading.remove>Final Submit</span>
                     <span wire:loading>Submitting...</span>
                 </flux:button>
             @endif
-        </div>
-    </div>
+        </flux:actions>
+    </flux:card>
 
 </div>

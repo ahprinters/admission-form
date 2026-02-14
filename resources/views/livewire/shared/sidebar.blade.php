@@ -1,169 +1,61 @@
-<div class="contents">
-    {{-- সাইডবার মেইন কন্টেইনার --}}
-    <flux:sidebar sticky collapsible="mobile" class="bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-700">
-        <flux:sidebar.header>
-            <flux:sidebar.brand
-                href="/dashboard"
-                logo="https://fluxui.dev/img/demo/logo.png"
-                name="Admin Panel"
-            />
+<div class="w-64 shrink-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
 
-            <flux:sidebar.collapse class="lg:hidden" />
-        </flux:sidebar.header>
+    {{-- Logo --}}
+    <div class="h-16 flex items-center px-6 font-semibold text-lg border-b dark:border-gray-700">
+        <a href="/dashboard">Admin Panel</a>
+    </div>
 
-        {{-- ডাইনামিক সার্চ বার --}}
-        <flux:sidebar.search placeholder="খুঁজুন..." />
+    {{-- Navigation --}}
+    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
 
-        <flux:sidebar.nav>
-            {{-- ড্যাশবোর্ড লিঙ্ক --}}
-            <flux:sidebar.item
-                icon="home"
-                href="/dashboard"
-                wire:navigate
-                :current="request()->is('dashboard')"
-            >
-                Dashboard
-            </flux:sidebar.item>
+        <x-sidebar.link href="/dashboard" :active="request()->is('dashboard')">
+            Dashboard
+        </x-sidebar.link>
 
-            {{-- শিক্ষার্থী ব্যবস্থাপনা গ্রুপ --}}
-            <x-student-management />
-            {{-- ক্লাস ম্যানেজমেন্ট কম্পোনেন্ট --}}
-            <x-class-management />
+        <x-sidebar.link href="{{ route('student.index') }}" :active="request()->routeIs('student.index')">
+            Students
+        </x-sidebar.link>
 
-            {{-- এক্সাম ম্যানেজমেন্ট --}}
-            <flux:sidebar.item
-                icon="clipboard-document"
-                href="{{ route('livewire.exam-manager') }}"
-                wire:navigate
-                :current="request()->routeIs('livewire.exam-manager')"
-            >
-                Exam Manager
-            </flux:sidebar.item>
+        <x-sidebar.link href="{{ route('admin.classes.index') }}" :active="request()->routeIs('admin.classes.index')">
+            Classes
+        </x-sidebar.link>
 
-            <flux:sidebar.item
-                icon="academic-cap"
-                href="{{ route('academic-sessions.index') }}"
-                wire:navigate
-                :current="request()->routeIs('academic-sessions.index')"
-            >
-                Academic Sessions
-            </flux:sidebar.item>
+        <x-sidebar.link href="{{ route('livewire.exam-manager') }}" :active="request()->routeIs('livewire.exam-manager')">
+            Exam Manager
+        </x-sidebar.link>
 
-            <flux:sidebar.item
-                icon="book-open"
-                href="{{ route('courses.index') }}"
-                wire:navigate
-                :current="request()->routeIs('courses.index')"
-            >
-                Courses
-            </flux:sidebar.item>
+        <x-sidebar.link href="{{ route('academic-sessions.index') }}" :active="request()->routeIs('academic-sessions.index')">
+            Academic Sessions
+        </x-sidebar.link>
 
-            {{-- সিমেস্টার ম্যানেজার --}}
-            <flux:sidebar.item
-                icon="calendar-days"
-                href="{{ route('semesters.index') }}"
-                wire:navigate
-                :current="request()->routeIs('semesters.index')"
-            >
-                Semesters
-            </flux:sidebar.item>
+        <x-sidebar.link href="{{ route('courses.index') }}" :active="request()->routeIs('courses.index')">
+            Courses
+        </x-sidebar.link>
 
-            {{-- ওয়েবসাইট সেটিংস --}}
-            <flux:sidebar.group heading="ওয়েবসাইট সেটিংস">
-                <flux:sidebar.item
-                    icon="megaphone"
-                    href="{{ route('admin.marquees') }}"
-                    wire:navigate
-                    :current="request()->routeIs('admin.marquees')"
-                >
-                    Marquee Manager
-                </flux:sidebar.item>
-            </flux:sidebar.group>
+        <x-sidebar.link href="{{ route('semesters.index') }}" :active="request()->routeIs('semesters.index')">
+            Semesters
+        </x-sidebar.link>
 
-            {{-- একাডেমিক সেকশন --}}
-            <flux:sidebar.group heading="একাডেমিক">
-                <flux:sidebar.item
-                    icon="clipboard-document-list"
-                    href="/attendance"
-                    wire:navigate
-                    :current="request()->is('attendance')"
-                >
-                    Attendance
-                </flux:sidebar.item>
+        <x-sidebar.link href="{{ route('admin.marquees') }}" :active="request()->routeIs('admin.marquees')">
+            Marquee Manager
+        </x-sidebar.link>
 
-                <flux:sidebar.item
-                    icon="calendar-days"
-                    href="#"
-                >
-                    ক্যালেন্ডার
-                </flux:sidebar.item>
+        <x-sidebar.link href="/attendance" :active="request()->is('attendance')">
+            Attendance
+        </x-sidebar.link>
 
-                <flux:sidebar.item
-                    icon="clipboard-document-check"
-                    href="#"
-                >
-                    ফলাফল
-                </flux:sidebar.item>
-            </flux:sidebar.group>
-        </flux:sidebar.nav>
+    </nav>
 
-        <flux:sidebar.spacer />
+    {{-- Profile / Logout --}}
+    <div class="border-t dark:border-gray-700 p-4">
+        <div class="text-sm text-gray-600 dark:text-gray-300 mb-3">
+            {{ auth()->user()->name }}
+        </div>
 
-        {{-- সেটিংস এবং ডার্ক মোড অপশন --}}
-        <flux:sidebar.nav>
-            <flux:sidebar.item icon="cog-8-tooth" href="#" wire:navigate>
-                সেটিংস
-            </flux:sidebar.item>
+        <button wire:click="logout"
+            class="w-full bg-red-500 hover:bg-red-600 text-white text-sm py-2 rounded-lg">
+            Logout
+        </button>
+    </div>
 
-            {{-- ডার্ক মোড টগল (যদি অ্যাপে সেটআপ থাকে) --}}
-            <flux:sidebar.item icon="moon" @click="$flux.dark = ! $flux.dark">
-                থিম পরিবর্তন
-            </flux:sidebar.item>
-        </flux:sidebar.nav>
-
-        {{-- প্রোফাইল সেকশন --}}
-        <flux:dropdown position="top" align="start" class="max-lg:hidden">
-            <flux:sidebar.profile
-                avatar="https://ui-avatars.com/api/?background=random&name={{ urlencode(auth()->user()->name) }}"
-                name="{{ auth()->user()->name }}"
-                description="Administrator"
-            />
-
-            <flux:menu>
-                <flux:menu.item icon="user-circle">প্রোফাইল</flux:menu.item>
-                <flux:menu.item icon="shield-check">নিরাপত্তা</flux:menu.item>
-
-                <flux:menu.separator />
-
-                <flux:menu.item
-                    wire:click="logout"
-                    icon="power"
-                    variant="danger"
-                >
-                    লগআউট করুন
-                </flux:menu.item>
-            </flux:menu>
-        </flux:dropdown>
-    </flux:sidebar>
-
-    {{-- মোবাইল ভিউ হেডার --}}
-    <flux:header class="lg:hidden border-b border-zinc-200 dark:border-zinc-700">
-        <flux:sidebar.toggle class="lg:hidden" icon="bars-3" inset="left" />
-
-        <flux:brand
-            href="/dashboard"
-            logo="https://fluxui.dev/img/demo/logo.png"
-            name="Admin"
-            class="ml-2"
-        />
-
-        <flux:spacer />
-
-        <flux:dropdown position="top" align="end">
-            <flux:profile avatar="https://ui-avatars.com/api/?background=random&name={{ urlencode(auth()->user()->name) }}" />
-            <flux:menu>
-                <flux:menu.item wire:click="logout" icon="power">Logout</flux:menu.item>
-            </flux:menu>
-        </flux:dropdown>
-    </flux:header>
 </div>

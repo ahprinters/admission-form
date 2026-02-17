@@ -10,9 +10,9 @@ class StudentFee extends Model
         'student_id',
         'fee_type_id',
         'amount',
-        'is_paid',
         'due_date',
-        'paid_at',
+        'total_amount',
+        'paid_amount',
     ];
 
     public function student()
@@ -23,6 +23,11 @@ class StudentFee extends Model
     public function feeType()
     {
         return $this->belongsTo(FeeType::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 
 

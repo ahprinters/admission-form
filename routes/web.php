@@ -1,5 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdmissionPdfController;
+
+// Livewire Components
 use App\Livewire\HomePage;
 use App\Livewire\Dashboard;
 use App\Livewire\Auth\Login;
@@ -12,58 +16,69 @@ use App\Livewire\Admin\AddClass;
 use App\Livewire\SessionManager;
 use App\Livewire\SemesterManager;
 use App\Livewire\Admin\ClassesIndex;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AdmissionPdfController;
 use App\Livewire\Admission\StudentAdmissionWizard;
 use App\Livewire\Admin\MarqueeManager;
 
-
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+// 🔥 NEW (Fee Management)
+use App\Livewire\Admin\FeeCollection;
+use App\Livewire\Admin\FeeAssign;
 
 Route::get('/', HomePage::class);
+
+// ==========================
+// Guest Routes
+// ==========================
 Route::middleware('guest')->group(function () {
+
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('auth.register');
+
 });
 
-Route::middleware(['auth'])->group(function () {
+// ==========================
+// Authenticated Routes
+// ==========================
+Route::middleware('auth')->group(function () {
+
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
-    Route::get('/admin/class/create', AddClass::class)->name('admin.class.create');
-    Route::get('/admin/classes', ClassesIndex::class)->name('admin.classes.index');
+    // -----------------------
+    // Admin Routes
+    // -----------------------
+    Route::prefix('admin')->name('admin.')->group(function () {
 
-    Route::view('/attendance', 'attendance.page')->name('attendance.hub');
+        Route::get('/class/create', AddClass::class)->name('class.create');
+        Route::get('/classes', ClassesIndex::class)->name('classes.index');
+        Route::get('/marquees', MarqueeManager::class)->name('marquees');
 
+        // 🔥 Fee Management
+        Route::get('/fees', FeeCollection::class)->name('fees.index');
+        Route::get('/fees/assign', FeeAssign::class)->name('fees.assign');
+    });
+
+    // -----------------------
     // Students
+    // -----------------------
     Route::get('/students', StudentList::class)->name('student.index');
     Route::get('/student/create', StudentForm::class)->name('student.create');
     Route::get('/student/edit/{id}', StudentForm::class)->name('student.edit');
 
-    // Admission Wizard (Step-2..8)
     Route::get('/students/{student}/admission', StudentAdmissionWizard::class)
         ->name('students.admission');
 
-    // exam manager
-    Route::get('/exams', ExamManager::class)->name('livewire.exam-manager');
-
-    // session manager
+    // -----------------------
+    // Academic
+    // -----------------------
+    Route::get('/exams', ExamManager::class)->name('exam.index');
     Route::get('/academic-sessions', SessionManager::class)->name('academic-sessions.index');
-
-    // course manager
     Route::get('/courses', CourseManager::class)->name('courses.index');
-
-    //semester manager
-
     Route::get('/semesters', SemesterManager::class)->name('semesters.index');
 
-    // marquee manager
-    Route::get('/admin/marquees', MarqueeManager::class)->name('admin.marquees');
+    Route::view('/attendance', 'attendance.page')->name('attendance.hub');
 
-
-   // DOMPDF
+    // -----------------------
+    // PDF
+    // -----------------------
     Route::post('/students/{student}/admission/pdf/generate', [AdmissionPdfController::class, 'generate'])
         ->name('students.admission.pdf.generate');
 

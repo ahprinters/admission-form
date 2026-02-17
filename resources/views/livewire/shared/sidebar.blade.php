@@ -6,43 +6,110 @@
     </div>
 
     {{-- Navigation --}}
-    <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+    <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
 
-        <x-sidebar.link href="/dashboard" :active="request()->is('dashboard')">
-            Dashboard
-        </x-sidebar.link>
+        {{-- ===================== --}}
+        {{-- Main --}}
+        {{-- ===================== --}}
+        <div class="space-y-2">
+            <x-sidebar.link href="/dashboard" :active="request()->is('dashboard')">
+                Dashboard
+            </x-sidebar.link>
+        </div>
 
-        <x-sidebar.link href="{{ route('student.index') }}" :active="request()->routeIs('student.index')">
-            Students
-        </x-sidebar.link>
+        {{-- ===================== --}}
+        {{-- Student Management --}}
+        {{-- ===================== --}}
+        <div>
+            <div class="px-2 text-xs uppercase text-gray-400 mb-2">
+                Student Management
+            </div>
 
-        <x-sidebar.link href="{{ route('admin.classes.index') }}" :active="request()->routeIs('admin.classes.index')">
-            Classes
-        </x-sidebar.link>
+            <div class="space-y-2">
+                <x-sidebar.link href="{{ route('student.index') }}"
+                    :active="request()->routeIs('student.index')">
+                    Students
+                </x-sidebar.link>
 
-        <x-sidebar.link href="{{ route('livewire.exam-manager') }}" :active="request()->routeIs('livewire.exam-manager')">
-            Exam Manager
-        </x-sidebar.link>
+                <x-sidebar.link href="{{ route('admin.classes.index') }}"
+                    :active="request()->routeIs('admin.classes.index')">
+                    Classes
+                </x-sidebar.link>
 
-        <x-sidebar.link href="{{ route('academic-sessions.index') }}" :active="request()->routeIs('academic-sessions.index')">
-            Academic Sessions
-        </x-sidebar.link>
+                <x-sidebar.link href="/attendance"
+                    :active="request()->is('attendance')">
+                    Attendance
+                </x-sidebar.link>
+            </div>
+        </div>
 
-        <x-sidebar.link href="{{ route('courses.index') }}" :active="request()->routeIs('courses.index')">
-            Courses
-        </x-sidebar.link>
+        {{-- ===================== --}}
+        {{-- Academic --}}
+        {{-- ===================== --}}
+        <div>
+            <div class="px-2 text-xs uppercase text-gray-400 mb-2">
+                Academic
+            </div>
 
-        <x-sidebar.link href="{{ route('semesters.index') }}" :active="request()->routeIs('semesters.index')">
-            Semesters
-        </x-sidebar.link>
+            <div class="space-y-2">
+                <x-sidebar.link href="{{ route('exam.index') }}"
+                    :active="request()->routeIs('exam.index')">
+                    Exam Manager
+                </x-sidebar.link>
 
-        <x-sidebar.link href="{{ route('admin.marquees') }}" :active="request()->routeIs('admin.marquees')">
-            Marquee Manager
-        </x-sidebar.link>
+                <x-sidebar.link href="{{ route('academic-sessions.index') }}"
+                    :active="request()->routeIs('academic-sessions.index')">
+                    Academic Sessions
+                </x-sidebar.link>
 
-        <x-sidebar.link href="/attendance" :active="request()->is('attendance')">
-            Attendance
-        </x-sidebar.link>
+                <x-sidebar.link href="{{ route('courses.index') }}"
+                    :active="request()->routeIs('courses.index')">
+                    Courses
+                </x-sidebar.link>
+
+                <x-sidebar.link href="{{ route('semesters.index') }}"
+                    :active="request()->routeIs('semesters.index')">
+                    Semesters
+                </x-sidebar.link>
+            </div>
+        </div>
+
+        {{-- ===================== --}}
+        {{-- Fee Management --}}
+        {{-- ===================== --}}
+        <div>
+            <div class="px-2 text-xs uppercase text-gray-400 mb-2">
+                Fee Management
+            </div>
+
+            <div class="space-y-2">
+                <x-sidebar.link href="{{ route('admin.fees.index') }}"
+                    :active="request()->routeIs('admin.fees.index')">
+                    Fee Collection
+                </x-sidebar.link>
+
+                <x-sidebar.link href="{{ route('admin.fees.assign') }}"
+                    :active="request()->routeIs('admin.fees.assign')">
+                    Assign Fee
+                </x-sidebar.link>
+            </div>
+        </div>
+
+        {{-- ===================== --}}
+        {{-- Website Settings --}}
+        {{-- ===================== --}}
+        <div>
+            <div class="px-2 text-xs uppercase text-gray-400 mb-2">
+                Website Settings
+            </div>
+
+            <div class="space-y-2">
+                <x-sidebar.link href="{{ route('admin.marquees') }}"
+                    :active="request()->routeIs('admin.marquees')">
+                    Marquee Manager
+                </x-sidebar.link>
+            </div>
+        </div>
 
     </nav>
 

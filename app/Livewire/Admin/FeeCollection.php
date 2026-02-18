@@ -3,19 +3,21 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
-use App\Models\StudentFee;
 use Livewire\WithPagination;
-use Livewire\Attributes\Layout;
+use Livewire\Attributes\Layout;   // ✅ ADD THIS
+use App\Models\StudentFee;
+use Illuminate\Support\Facades\DB;
+
 #[Layout('components.layouts.admin')]
-
-
 class FeeCollection extends Component
 {
     use WithPagination;
 
-    public $search ='';
-    public $status = 'all'; // all/ paid/ unpaid
-    public $payment_amount;
+    public $search = '';
+    public $status = 'all'; // all / paid / unpaid / partial
+    public $pay_amount = [];
+
+    protected $paginationTheme = 'tailwind';
 
     public function updatingSearch()
     {
@@ -27,52 +29,35 @@ class FeeCollection extends Component
         $this->resetPage();
     }
 
-    public function markAsPaid($id)
-    {
-        StudentFee::where('id', $id)->update([
-            'is_paid' => true,
-            'paid_at' => now(),
-        ]);
-
-        session()->flash('message', 'ফি সফলভাবে পেইড মার্ক করা হয়েছে!');
-
-    }
     public function makePayment($feeId)
     {
         $fee = StudentFee::findOrFail($feeId);
 
-        $this->validate([
-            'payment_amount' => 'required|numaric|min:1'
-        ]);
+        $amount = $this->pay_amount[$feeId] ?? 0;
 
-        //prevent overpayment
-        if (($fee->paid_amount + $this->payment_amount) > $fee->total_amount) {
-            session()->flash('error', 'payment exceeds total amount!');
+        if ($amount <= 0) {
+            session()->flash('error', 'Enter valid amount.');
             return;
         }
 
-            // Save payment record
-        $fee->payments()->create([
-            'amount' => $this->payment_amount,
-            'paid_at' => now(),
-        ]);
+        // Prevent overpayment
+        if (($fee->paid_amount + $amount) > $fee->total_amount) {
+            session()->flash('error', 'Payment exceeds total amount!');
+            return;
+        }
 
-        //Update paid amount
-        $fee->payments()->create([
-            'amount' =>$this->payment_amount,
-            'paid_at'   =>now(),
-        ]);
-
-        //Update paid amount
+        // Update paid_amount
         $fee->update([
-        'paid_amount' => $fee->paid_amount + $this->payment_amount
+            'paid_amount' => $fee->paid_amount + $amount
         ]);
-        $this->payment_amount = null;
+
+        // Reset input
+        $this->pay_amount[$feeId] = null;
 
         session()->flash('success', 'Payment added successfully!');
-
     }
-public function render()
+
+    public function render()
     {
         $fees = StudentFee::with('student', 'feeType')
             ->when($this->search, function ($query) {
@@ -81,13 +66,27 @@ public function render()
                 });
             })
             ->when($this->status !== 'all', function ($query) {
-                $query->where('is_paid', $this->status === 'paid');
+                if ($this->status === 'paid') {
+                    $query->whereColumn('paid_amount', '>=', 'total_amount');
+                }
+
+                if ($this->status === 'unpaid') {
+                    $query->where('paid_amount', 0);
+                }
+
+                if ($this->status === 'partial') {
+                    $query->where('paid_amount', '>', 0)
+                          ->whereColumn('paid_amount', '<', 'total_amount');
+                }
             })
             ->latest()
             ->paginate(10);
 
-        $totalCollected = StudentFee::where('is_paid', true)->sum('amount');
-        $totalPending = StudentFee::where('is_paid', false)->sum('amount');
+        // Dynamic totals
+        $totalCollected = StudentFee::sum('paid_amount');
+        $totalPending = StudentFee::sum(
+            DB::raw('total_amount - paid_amount')
+        );
 
         return view('livewire.admin.fee-collection', [
             'fees' => $fees,

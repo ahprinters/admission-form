@@ -11,19 +11,32 @@ class RoleMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure $next
+     * @param mixed ...$roles
+     * @return \Illuminate\Http\Response
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
 
-    //Not logged in
+    // Check if the user is logged in
+
         if (!auth()->check()) {
             abort(401, 'Unauthorized');
          }
 
         $user = auth()->user();
 
-        //Role not allowed
+        // Loop through roles and check if the user has any of the specified roles
+
+        foreach ($roles as $role) {
+            if ($user->hasRole($role)) {
+                return $next($request); // Continue request if user has any required role
+            }
+        }
+
+       // If the user doesn't have the necessary role
+
         if(!in_array($user->role, $roles)){
             abort(403, 'Access Denied');
         }

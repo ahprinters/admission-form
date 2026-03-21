@@ -11,6 +11,14 @@
         <x-ui.input label="পাসওয়ার্ড" type="password" wire:model.defer="password" />
         <x-ui.input label="কনফার্ম পাসওয়ার্ড" type="password" wire:model.defer="password_confirmation" />
 
+        {{-- <!-- রোল সিলেক্ট ফিল্ড -->
+        <x-ui.select
+            label="রোল"
+            wire:model.defer="role"
+            :options="['user' => 'User', 'admin' => 'Admin']"
+            placeholder="রোল নির্বাচন করুন"
+        /> --}}
+
         <x-ui.button type="submit">
             রেজিস্টার করুন
         </x-ui.button>

@@ -1,6 +1,6 @@
 import './bootstrap';
-import alpine from 'alpinejs';
+// import alpine from 'alpinejs';
 
-window.Alpine = alpine;
+// window.Alpine = alpine;
 
-Alpine.start();
+// Alpine.start();
